@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Advanced To-Do App 📝</title>
+
+    <style>
+        body {
+            font-family: Arial;
+            background: #0f172a;
+            color: white;
+            text-align: center;
+        }
+
+        h1 {
+            margin-top: 20px;
+        }
+
+        input {
+            padding: 10px;
+            width: 60%;
+            border-radius: 5px;
+            border: none;
+        }
+
+        button {
+            padding: 10px;
+            margin: 5px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .task {
+            background: #1e293b;
+            margin: 10px auto;
+            padding: 10px;
+            width: 70%;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .done {
+            text-decoration: line-through;
+            color: gray;
+        }
+    </style>
+
+    <script>
+        let tasks = JSON.parse(localStorage.getItem("tasks")) || [];
+
+        function saveTasks() {
+            localStorage.setItem("tasks", JSON.stringify(tasks));
+        }
+
+        function renderTasks(filter = "all") {
+            let list = document.getElementById("list");
+            list.innerHTML = "";
+
+            let filtered = tasks.filter(t => {
+                if (filter === "completed") return t.done;
+                if (filter === "pending") return !t.done;
+                return true;
+            });
+
+            filtered.forEach((task, index) => {
+                let div = document.createElement("div");
+                div.className = "task";
+
+                let span = document.createElement("span");
+                span.innerText = task.text;
+
+                if (task.done) span.classList.add("done");
+
+                span.onclick = function() {
+                    tasks[index].done = !tasks[index].done;
+                    saveTasks();
+                    renderTasks();
+                };
+
+                let del = document.createElement("button");
+                del.innerText = "❌";
+                del.onclick = function() {
+                    tasks.splice(index, 1);
+                    saveTasks();
+                    renderTasks();
+                };
+
+                div.appendChild(span);
+                div.appendChild(del);
+                list.appendChild(div);
+            });
+
+            document.getElementById("count").innerText =
+                "Total Tasks: " + tasks.length;
+        }
+
+        function addTask() {
+            let input = document.getElementById("taskInput");
+            let text = input.value.trim();
+
+            if (text === "") return;
+
+            tasks.push({ text: text, done: false });
+            saveTasks();
+            renderTasks();
+
+            input.value = "";
+        }
+
+        function handleEnter(event) {
+            if (event.key === "Enter") addTask();
+        }
+
+        window.onload = function() {
+            renderTasks();
+        };
+    </script>
+
+</head>
+
+<body>
+
+    <h1>Advanced To-Do App 📝</h1>
+
+    <input type="text" id="taskInput" placeholder="Enter task..." onkeypress="handleEnter(event)">
+    <button onclick="addTask()">Add</button>
+
+    <div>
+        <button onclick="renderTasks('all')">All</button>
+        <button onclick="renderTasks('completed')">Completed</button>
+        <button onclick="renderTasks('pending')">Pending</button>
+    </div>
+
+    <h3 id="count"></h3>
+
+    <div id="list"></div>
+
+</body>
+</html>
